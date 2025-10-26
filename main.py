@@ -1,13 +1,27 @@
+from types import SimpleNamespace
+import odooApi, json
 from flask import Flask, jsonify, request
+
 
 app = Flask(__name__)
 usuarios=[]
-@app.route("/pepe", methods=['GET'])
+
+@app.route("/login", methods=['POST'])
+
+def login():
+    data =request.get_json()
+    if odooApi.login(data[0], data[1]):
+        return jsonify({"Exito": "Autentificacion realizada exitosamente"}), 200
+    else:
+        return jsonify({"mensaje": "Recurso no encontrado"}), 404
+
+@app.route("/get", methods=['GET'])
 
 def hello_world():
-    nombre = request.args.get('nombre', 'Desconocido')
-    edad = request.args.get('edad', 1, type=int)
-    return f"{nombre} {edad}"
+    
+    odooApi.buscarId(tabla='res.partner',filtro=f)
+    return "exito"
+
 @app.route("/add", methods=['POST'])
 
 def addUsuarios():
@@ -24,16 +38,6 @@ def addUsuarios():
 def eliminar(id):
     try:
         return jsonify(usuarios.pop(id)), 200
-    except IndexError:
-        return jsonify({"mensaje": "Recurso no encontrado"}), 404
-    
-@app.route("/put/<int:id>", methods=['PUT'] )
-
-def cambiar(id):
-    try:
-        nombre= request.args.get("nombre")
-        usuarios[id].nombre=nombre
-        return jsonify(f"Cambio relizado exitosamenta{usuarios[id]}"), 200
     except IndexError:
         return jsonify({"mensaje": "Recurso no encontrado"}), 404
 
