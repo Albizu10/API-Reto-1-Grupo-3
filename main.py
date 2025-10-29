@@ -5,8 +5,8 @@ url = "http://odoo-grupo3.duckdns.org"
 DB = "edu-Tech-Solutions"
 #estas se asignan al relizar el login
 USR = ""
-PASS=""
-UID= ""
+PASS="usuario"
+UID= "2"
 common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
 models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
 
@@ -83,6 +83,8 @@ def api_documentation():
     """
     return Response(html_doc, mimetype='text/html')
 
+
+
 @app.route("/login", methods=['POST'])
 
 def login():
@@ -97,83 +99,117 @@ def login():
     else:
         return jsonify("Error, la autenticacion ha fallado"), 404
 
-@app.route("/searchID", methods=['POST'])
-def getID():# metodo que recibe un json y devuelve los id segun filtro y tabla
-    data = request.get_json() or {}
-    tabla = data.get("tabla")
-    filtros = data.get("filtros")
-    
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
-    try:
-        if filtros==None:
-            ids = models.execute_kw(DB, UID, PASS, tabla, 'search', [[]])
-        else:
-            ids = models.execute_kw(DB, UID, PASS, tabla, 'search', [filtros])
-        return {"ids": ids}, 200
-    except Exception as e:
-        return {"error": str(e)}, 500
+@app.route("/searchID/<string:tabla>", methods=['GET'])
+def search_id(tabla):
+    # Leer filtros desde los parametros GET
+    filtros_str = request.args.get("filtros")
 
-@app.route("/getCantidad", methods=['POST'])
-def getCantidad():# metodo que devuelve la suma total de elementos segun la tabla y filtros
-    data = request.get_json()
-    tabla = data.get("tabla")
-    filtros = data.get("filtros")
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
+    # Convertir filtros de texto JSON a lista de Python
+    if filtros_str:
+        try:
+            filtros = json.loads(filtros_str)
+            if not isinstance(filtros, list):
+                return jsonify({"error": "'filtros' debe ser una lista"}), 400
+        except Exception:
+            return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
+    else:
+        filtros = []  # si no hay filtros, busca todos los registros
+
     try:
-        if filtros==None:
-            cant = models.execute_kw(DB, UID, PASS, tabla, 'search_count', [[]])
-        else:
-            cant = models.execute_kw(DB, UID, PASS, tabla, 'search_count', [filtros])
+        ids = models.execute_kw(DB, UID, PASS,tabla,'search',[filtros])
+        return jsonify({"ids": ids}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/getCantidad/<string:tabla>", methods=['GET'])
+def getCantidad(tabla):# metodo que devuelve la suma total de elementos segun la tabla y filtros
+    filtros_str = request.args.get("filtros")
+
+    # Convertir filtros de texto JSON a lista de Python
+    if filtros_str:
+        try:
+            filtros = json.loads(filtros_str)
+            if not isinstance(filtros, list):
+                return jsonify({"error": "'filtros' debe ser una lista"}), 400
+        except Exception:
+            return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
+    else:
+        filtros = []  # si no hay filtros, busca todos los registros
+    try:
+        cant = models.execute_kw(DB, UID, PASS, tabla, 'search_count', [filtros])
         return {"Cantidad":cant}, 200
     except Exception as e:
         return {"error": str(e)}, 500
 
-@app.route("/getDatosID", methods=['POST'])
-def getDatos():# metodo que devuelve los datos de una tabla segun el id y los campos a mostrar
-    data = request.get_json()
-    tabla = data.get("tabla")
-    id = data.get("id")
-    campos = data.get("campos", [])  # campos opcional, puede quedar vacío por defecto para mostrar todos
+
+@app.route("/getDatosID/<string:tabla>", methods=['GET'])
+def getDatos(tabla):
+    id_str = request.args.get("id")
+    campos_str = request.args.get("campos")
+    if not id_str:
+        return jsonify({"error": "El parámetro 'id' es obligatorio."}), 400
+    try:
+        if id_str.startswith("["):
+            ids = json.loads(id_str) 
+        else :
+            ids = [int(id_str)]
+
+    except Exception:
+        return jsonify({"error": "Formato inválido para 'id'. Debe ser un número o una lista JSON."}), 400
     
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
-    if not id:
-        return {"error": "El parametro 'id' es obligatorio."}, 400
+    if campos_str:
+        try:
+            campos = json.loads(campos_str)
+            if not isinstance(campos, list):
+                return jsonify({"error": "'campos' debe ser una lista"}), 400
+        except Exception:
+            return jsonify({"error": "Formato JSON inválido en 'campos'"}), 400
+    else:
+        campos = []  # sin campos = todos los disponibles
     try:
-        if isinstance(id, list):# devuelve true si es una lista
-            ids = id 
-        else:
-            ids = [id]
         result = models.execute_kw(DB, UID, PASS, tabla, 'read', [ids], {'fields': campos})
-        return {"result": result}, 200
+        return jsonify({"result": result}), 200
+
     except Exception as e:
-        return {"error": str(e)}, 500
+        return jsonify({"error": str(e)}), 500
 
 
 
-@app.route("/getDatosFiltro", methods=['POST'])
-def getFiltrosYCampos():
-    data = request.get_json()
-    tabla = data.get("tabla")
-    campos = data.get("campos", [])
-    filtros = data.get("filtros")
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
+@app.route("/getDatosFiltro/<string:tabla>", methods=['GET'])
+def getFiltrosYCampos(tabla):# metodo que devuelve los datos segun tabla y con filtros y campos como parametros opcionales
+    campos_str = request.args.get("campos")
+    filtros_str = request.args.get("filtros")
+
+    if campos_str:
+        try:
+            campos = json.loads(campos_str)
+            if not isinstance(campos, list):
+                return jsonify({"error": "'campos' debe ser una lista"}), 400
+        except Exception:
+            return jsonify({"error": "Formato JSON inválido en 'campos'"}), 400
+    else:
+        campos = []
+
+    if filtros_str:
+        try:
+            filtros = json.loads(filtros_str)
+            if not isinstance(filtros, list):
+                return jsonify({"error": "'filtros' debe ser una lista"}), 400
+        except Exception:
+            return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
+    else:
+        filtros = []
     try:
-        if filtros==None:
-            result = models.execute_kw(DB, UID, PASS, tabla, 'search_read', [[]], {'fields': campos})
-        else:
-            result= models.execute_kw(DB, UID, PASS, tabla, 'search_read', [filtros], {'fields': campos})
-        return result, 200
+        result= models.execute_kw(DB, UID, PASS, tabla, 'search_read', [filtros], {'fields': campos})
+        return jsonify(result), 200
     except Exception as e:
-        return {"error": str(e)}, 500
+        return jsonify({"error": str(e)}), 500
 
 
 
 @app.route("/nuevo", methods=['POST'])
-def nuevo():
+def nuevo():# metodo para aniadir nuevos elementos con sus atributos
     data = request.get_json()
     tabla = data.get("tabla")
     nuevo = data.get("nuevo")# un objeto json para atributos del nuevo elemento
@@ -188,7 +224,7 @@ def nuevo():
         return {"error": str(e)}, 500 
 
 @app.route("/modificar", methods=['PUT'])
-def modificar():
+def modificar():#metodo para modificar los atributos de los elementos de una tabla con id(s) 
     data = request.get_json()
     tabla = data.get("tabla")
     id = data.get("id")
@@ -216,7 +252,7 @@ def modificar():
     
 
 @app.route("/eliminar", methods=['DELETE'])
-def eliminar():
+def eliminar():#metodo para eliminar 
     data = request.get_json()
     tabla = data.get("tabla")
     id = data.get("id")
