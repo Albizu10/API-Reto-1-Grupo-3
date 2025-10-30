@@ -16,72 +16,126 @@ app = Flask(__name__)
 def api_documentation():
     html_doc = """
     <!DOCTYPE html>
-    <html>
+    <html lang="es">
     <head>
-        <title>Documentación API Odoo</title>
+        <meta charset="UTF-8">
+        <title>Documentación API Odoo Flask</title>
         <style>
-            body { font-family: Arial, sans-serif; margin: 40px; background: #f8f8f8; color: #333; }
-            h1, h2 { color: #005A9C; }
-            pre { background: #eee; padding: 10px; border-radius: 5px; }
-            .endpoint { background: #fff; margin-bottom: 20px; padding: 15px; border-radius: 8px; box-shadow: 1px 1px 6px rgba(0,0,0,0.1); }
+            body {
+                font-family: Arial, sans-serif;
+                margin: 40px;
+                background: #f8f8f8;
+                color: #333;
+            }
+            h1, h2 {
+                color: #005A9C;
+            }
+            pre {
+                background: #eee;
+                padding: 10px;
+                border-radius: 5px;
+                overflow-x: auto;
+            }
+            .endpoint {
+                background: #fff;
+                margin-bottom: 20px;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 1px 1px 6px rgba(0,0,0,0.1);
+            }
+            .method {
+                font-weight: bold;
+                background: #005A9C;
+                color: white;
+                padding: 3px 8px;
+                border-radius: 5px;
+                font-size: 0.9em;
+            }
+            footer {
+                text-align: center;
+                margin-top: 40px;
+                color: #777;
+            }
         </style>
     </head>
     <body>
-        <h1>Documentación API Odoo</h1>
-        <p>Esta API expone los siguientes endpoints para interactuar con Odoo vía XML-RPC:</p>
+        <h1>📘 Documentación API Odoo Flask</h1>
+        <p>Esta API permite interactuar con una base de datos Odoo a través de XML-RPC.</p>
 
         <div class="endpoint">
-            <h2>/login [POST]</h2>
-            <p>Autenticar usuario y obtener sesión.</p>
-            <pre>JSON Body: {"user": "nombre", "password": "clave"}</pre>
+            <h2>/login <span class="method">POST</span></h2>
+            <p>Autentica un usuario y guarda la sesión (UID).</p>
+            <pre>{
+  "user": "usuario@ejemplo.com",
+  "password": "tu_contraseña"
+}</pre>
         </div>
 
         <div class="endpoint">
-            <h2>/searchID [POST]</h2>
-            <p>Obtener IDs según filtros en un modelo.</p>
-            <pre>JSON Body: {"tabla": "res.partner", "filtros": [["is_company", "=", true]]}</pre>
+            <h2>/searchID/&lt;tabla&gt; <span class="method">GET</span></h2>
+            <p>Devuelve los IDs de registros que cumplen los filtros.</p>
+            <pre>?filtros=[["campo","=","valor"]]</pre>
+            <p><b>Ejemplo:</b> /searchID/res.partner?filtros=[["is_company","=",true]]</p>
         </div>
 
         <div class="endpoint">
-            <h2>/getCantidad [POST]</h2>
-            <p>Obtener cantidad de registros que cumplen filtro.</p>
-            <pre>JSON Body: {"tabla": "res.partner", "filtros": [["active", "=", true]]}</pre>
+            <h2>/getCantidad/&lt;tabla&gt; <span class="method">GET</span></h2>
+            <p>Devuelve la cantidad total de registros según los filtros aplicados.</p>
+            <pre>?filtros=[["active","=",true]]</pre>
+            <p><b>Ejemplo:</b> /getCantidad/res.partner?filtros=[["active","=",true]]</p>
         </div>
 
         <div class="endpoint">
-            <h2>/getDatosID [POST]</h2>
-            <p>Obtener datos de registros dado ID o lista de IDs.</p>
-            <pre>JSON Body: {"tabla": "res.partner", "id": [3,4], "campos": ["name", "email"]}</pre>
+            <h2>/getDatosID/&lt;tabla&gt; <span class="method">GET</span></h2>
+            <p>Obtiene los datos de uno o varios registros a partir de sus IDs.</p>
+            <pre>?id=[1,2,3]&campos=["name","email"]</pre>
+            <p><b>Ejemplo:</b> /getDatosID/res.partner?id=[3]&campos=["name","email"]</p>
         </div>
 
         <div class="endpoint">
-            <h2>/getDatosFiltro [POST]</h2>
-            <p>Obtener datos según filtros y campos.</p>
-            <pre>JSON Body: {"tabla": "res.partner", "filtros": [["country_id", "=", 21]], "campos": ["name", "phone"]}</pre>
+            <h2>/getDatosFiltro/&lt;tabla&gt; <span class="method">GET</span></h2>
+            <p>Devuelve los registros que cumplan los filtros y campos indicados.</p>
+            <pre>?filtros=[["country_id","=",21]]&campos=["name","phone"]</pre>
+            <p><b>Ejemplo:</b> /getDatosFiltro/res.partner?filtros=[["country_id","=",21]]&campos=["name","phone"]</p>
         </div>
 
         <div class="endpoint">
-            <h2>/nuevo [POST]</h2>
-            <p>Crear un nuevo registro.</p>
-            <pre>JSON Body: {"tabla": "res.partner", "nuevo": {"name": "Empresa X", "email": "contacto@empresa.com"}}</pre>
+            <h2>/nuevo <span class="method">POST</span></h2>
+            <p>Crea un nuevo registro en una tabla.</p>
+            <pre>{
+  "tabla": "res.partner",
+  "nuevo": {"name": "Empresa X", "email": "contacto@empresa.com"}
+}</pre>
         </div>
 
         <div class="endpoint">
-            <h2>/modificar [PUT]</h2>
-            <p>Modificar registros por ID(s).</p>
-            <pre>JSON Body: {"tabla": "res.partner", "id": 5, "modificaciones": {"phone": "123456789"}}</pre>
+            <h2>/modificar <span class="method">PUT</span></h2>
+            <p>Modifica los registros existentes según ID(s).</p>
+            <pre>{
+  "tabla": "res.partner",
+  "id": [5],
+  "modificaciones": {"phone": "123456789"}
+}</pre>
         </div>
 
         <div class="endpoint">
-            <h2>/eliminar [DELETE]</h2>
-            <p>Eliminar registro(s) por ID(s).</p>
-            <pre>JSON Body: {"tabla": "res.partner", "id": [10,11]}</pre>
+            <h2>/eliminar <span class="method">DELETE</span></h2>
+            <p>Elimina uno o varios registros de una tabla.</p>
+            <pre>{
+  "tabla": "res.partner",
+  "id": [10,11]
+}</pre>
         </div>
 
+        <footer>
+            <hr>
+            <p>© 2025 Edu Tech Solutions - API Grupo 3</p>
+        </footer>
     </body>
     </html>
     """
     return Response(html_doc, mimetype='text/html')
+
 
 
 
