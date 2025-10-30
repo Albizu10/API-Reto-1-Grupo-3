@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Documentación API Odoo Flask</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1>📘 Documentación API Odoo Flask</h1>
+    <p>Esta API permite interactuar con una base de datos Odoo a través de XML-RPC.</p>
+
+    <div class="endpoint">
+        <h2>/login <span class="method">POST</span></h2>
+        <p>Autentica un usuario y guarda la sesión (UID).</p>
+        <pre>{
+  "user": "usuario@ejemplo.com",
+  "password": "tu_contraseña"
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h2>/searchID/&lt;tabla&gt; <span class="method">GET</span></h2>
+        <p>Devuelve los IDs de registros que cumplen los filtros.</p>
+        <pre>?filtros=[["campo","=","valor"]]</pre>
+        <p><b>Ejemplo:</b> /searchID/res.partner?filtros=[["is_company","=",true]]</p>
+    </div>
+
+    <div class="endpoint">
+        <h2>/getCantidad/&lt;tabla&gt; <span class="method">GET</span></h2>
+        <p>Devuelve la cantidad total de registros según los filtros aplicados.</p>
+        <pre>?filtros=[["active","=",true]]</pre>
+        <p><b>Ejemplo:</b> /getCantidad/res.partner?filtros=[["active","=",true]]</p>
+    </div>
+
+    <div class="endpoint">
+        <h2>/getDatosID/&lt;tabla&gt; <span class="method">GET</span></h2>
+        <p>Obtiene los datos de uno o varios registros a partir de sus IDs.</p>
+        <pre>?id=[1,2,3]&campos=["name","email"]</pre>
+        <p><b>Ejemplo:</b> /getDatosID/res.partner?id=[3]&campos=["name","email"]</p>
+    </div>
+
+    <div class="endpoint">
+        <h2>/getDatosFiltro/&lt;tabla&gt; <span class="method">GET</span></h2>
+        <p>Devuelve los registros que cumplan los filtros y campos indicados.</p>
+        <pre>?filtros=[["country_id","=",21]]&campos=["name","phone"]</pre>
+        <p><b>Ejemplo:</b> /getDatosFiltro/res.partner?filtros=[["country_id","=",21]]&campos=["name","phone"]</p>
+    </div>
+
+    <div class="endpoint">
+        <h2>/nuevo <span class="method">POST</span></h2>
+        <p>Crea un nuevo registro en una tabla.</p>
+        <pre>{
+  "tabla": "res.partner",
+  "nuevo": {"name": "Empresa X", "email": "contacto@empresa.com"}
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h2>/modificar <span class="method">PUT</span></h2>
+        <p>Modifica los registros existentes según ID(s).</p>
+        <pre>{
+  "tabla": "res.partner",
+  "id": [5],
+  "modificaciones": {"phone": "123456789"}
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <h2>/eliminar <span class="method">DELETE</span></h2>
+        <p>Elimina uno o varios registros de una tabla.</p>
+        <pre>{
+  "tabla": "res.partner",
+  "id": [10,11]
+}</pre>
+    </div>
+
+    <footer>
+        <hr>
+        <p>© 2025 Edu Tech Solutions - API Grupo 3</p>
+    </footer>
+</body>
+
+</html>
