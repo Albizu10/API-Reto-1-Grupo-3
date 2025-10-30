@@ -108,7 +108,7 @@ def getDatos(tabla):# devuelve los datos de un elemento segun la tabla y el id(s
         campos = []  # sin campos = todos los disponibles
     try:
         result = models.execute_kw(DB, session["uid"], session["password"], tabla, 'read', [ids], {'fields': campos})
-        return jsonify({"result": result}), 200
+        return jsonify(result), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

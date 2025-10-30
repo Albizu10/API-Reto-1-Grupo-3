@@ -18,6 +18,12 @@
   "user": "usuario@ejemplo.com",
   "password": "tu_contraseña"
 }</pre>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>{
+  "mensaje": "Autenticación exitosa"
+}</pre>
+        <p>Códigos HTTP: 200 (éxito), 401 (credenciales inválidas)</p>
     </div>
 
     <div class="endpoint">
@@ -25,6 +31,12 @@
         <p>Devuelve los IDs de registros que cumplen los filtros.</p>
         <pre>?filtros=[["campo","=","valor"]]</pre>
         <p><b>Ejemplo:</b> /searchID/res.partner?filtros=[["is_company","=",true]]</p>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>{
+  "ids": [1, 4, 7]
+}</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (error de formato), 401 (sin autenticación), 500 (error interno)</p>
     </div>
 
     <div class="endpoint">
@@ -32,6 +44,10 @@
         <p>Devuelve la cantidad total de registros según los filtros aplicados.</p>
         <pre>?filtros=[["active","=",true]]</pre>
         <p><b>Ejemplo:</b> /getCantidad/res.partner?filtros=[["active","=",true]]</p>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Texto plano(string)</p>
+        <pre>352</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (error de formato), 401 (no autenticado), 500 (error interno)</p>
     </div>
 
     <div class="endpoint">
@@ -39,6 +55,12 @@
         <p>Obtiene los datos de uno o varios registros a partir de sus IDs.</p>
         <pre>?id=[1,2,3]&campos=["name","email"]</pre>
         <p><b>Ejemplo:</b> /getDatosID/res.partner?id=[3]&campos=["name","email"]</p>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>[
+    {"id": 3, "name": "Empresa Alfa", "email": "alfa@correo.com"}
+]</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (parámetros inválidos), 401 (no autenticado), 500 (error)</p>
     </div>
 
     <div class="endpoint">
@@ -46,6 +68,13 @@
         <p>Devuelve los registros que cumplan los filtros y campos indicados.</p>
         <pre>?filtros=[["country_id","=",21]]&campos=["name","phone"]</pre>
         <p><b>Ejemplo:</b> /getDatosFiltro/res.partner?filtros=[["country_id","=",21]]&campos=["name","phone"]</p>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>[
+  {"id": 10, "name": "Empresa Beta", "phone": "987654321"},
+  {"id": 14, "name": "Comercial Delta", "phone": "912345678"}
+]</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (error de formato), 401 (no autenticado), 500 (error)</p>
     </div>
 
     <div class="endpoint">
@@ -55,6 +84,12 @@
   "tabla": "res.partner",
   "nuevo": {"name": "Empresa X", "email": "contacto@empresa.com"}
 }</pre>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>{
+  "id": 42
+}</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (faltan parámetros), 401 (sin autenticación), 500 (error interno)</p>
     </div>
 
     <div class="endpoint">
@@ -65,6 +100,13 @@
   "id": [5],
   "modificaciones": {"phone": "123456789"}
 }</pre>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>{
+  "message": "Operacion exitosa"
+}</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (error o parámetros incorrectos), 401 (sin autenticación), 500 (error interno)
+        </p>
     </div>
 
     <div class="endpoint">
@@ -74,6 +116,12 @@
   "tabla": "res.partner",
   "id": [10,11]
 }</pre>
+        <h3>Salida</h3>
+        <p><b>Tipo:</b> Json</p>
+        <pre>{
+  "message": "Registro eliminado exitosamente."
+}</pre>
+        <p>Códigos HTTP: 200 (éxito), 400 (no se pudo eliminar), 401 (no autenticado), 500 (error interno)</p>
     </div>
 
     <footer>
