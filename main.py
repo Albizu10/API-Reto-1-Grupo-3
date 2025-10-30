@@ -1,7 +1,7 @@
 import json, xmlrpc.client
 from flask import Flask, Response, jsonify, request
 # valiables globales
-url = "http://odoogroup.duckdns.org"
+url = "http://odoogroup3.duckdns.org"
 DB = "edu-TechSolutions"
 #estas se asignan al relizar el login
 USR = ""
