@@ -1,12 +1,12 @@
 import json, xmlrpc.client
 from flask import Flask, Response, jsonify, request
 # valiables globales
-url = "http://odoo-grupo3.duckdns.org"
-DB = "edu-Tech-Solutions"
+url = "http://odoogroup.duckdns.org"
+DB = "edu-TechSolutions"
 #estas se asignan al relizar el login
 USR = ""
-PASS="usuario"
-UID= "2"
+PASS=""
+UID= ""
 common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
 models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
 
@@ -153,6 +153,7 @@ def login():
     else:
         return jsonify("Error, la autenticacion ha fallado"), 404
 
+
 @app.route("/searchID/<string:tabla>", methods=['GET'])
 def search_id(tabla):
     # Leer filtros desde los parametros GET
@@ -180,7 +181,6 @@ def search_id(tabla):
 def getCantidad(tabla):# metodo que devuelve la suma total de elementos segun la tabla y filtros
     filtros_str = request.args.get("filtros")
 
-    # Convertir filtros de texto JSON a lista de Python
     if filtros_str:
         try:
             filtros = json.loads(filtros_str)
@@ -189,16 +189,16 @@ def getCantidad(tabla):# metodo que devuelve la suma total de elementos segun la
         except Exception:
             return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
     else:
-        filtros = []  # si no hay filtros, busca todos los registros
+        filtros = []
     try:
         cant = models.execute_kw(DB, UID, PASS, tabla, 'search_count', [filtros])
-        return {"Cantidad":cant}, 200
+        return str(cant), 200
     except Exception as e:
         return {"error": str(e)}, 500
 
 
 @app.route("/getDatosID/<string:tabla>", methods=['GET'])
-def getDatos(tabla):
+def getDatos(tabla):# devuelve los datos de un elemento segun la tabla y el id(s)
     id_str = request.args.get("id")
     campos_str = request.args.get("campos")
     if not id_str:
@@ -227,7 +227,6 @@ def getDatos(tabla):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 @app.route("/getDatosFiltro/<string:tabla>", methods=['GET'])
@@ -306,7 +305,7 @@ def modificar():#metodo para modificar los atributos de los elementos de una tab
     
 
 @app.route("/eliminar", methods=['DELETE'])
-def eliminar():#metodo para eliminar 
+def eliminar():#metodo para eliminar por id
     data = request.get_json()
     tabla = data.get("tabla")
     id = data.get("id")
