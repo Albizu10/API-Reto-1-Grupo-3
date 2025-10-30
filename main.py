@@ -1,7 +1,7 @@
 import json, xmlrpc.client
 from flask import Flask, jsonify, request, render_template, session
 # valiables globales
-url = "http://odoogroup.duckdns.org"
+url = "http://odoogroup3.duckdns.org"
 DB = "edu-TechSolutions"
 common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
 models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
