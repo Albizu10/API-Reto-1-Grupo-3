@@ -20,7 +20,7 @@ app.config.update(
 def api_documentation():
     return render_template("index.html")
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["POST"])#Metodo para realizar el login y devuelve una cookie
 def login():
     data = request.get_json()
     user = data.get("user")
@@ -31,15 +31,15 @@ def login():
         session["uid"] = uid
         session["user"] = user
         session["password"] = password
-        return jsonify({"mensaje": "Autenticación exitosa"}), 200
+        return jsonify({"mensaje": "Autenticacion exitosa"}), 200
     else:
-        return jsonify({"error": "Credenciales inválidas"}), 401
+        return jsonify({"error": "Credenciales invalidas"}), 401
 
 
-@app.route("/searchID/<string:tabla>", methods=['GET'])
+@app.route("/searchID/<string:tabla>", methods=['GET'])#metodo para buscar los id por filtros y tabla
 def search_id(tabla):
 
-    if "uid" not in session:
+    if "uid" not in session:#verifica autentificacion
         return jsonify({"error": "Usuario no autenticado"}), 401
     # Leer filtros desde los parametros GET
     filtros_str = request.args.get("filtros")
@@ -51,7 +51,7 @@ def search_id(tabla):
             if not isinstance(filtros, list):
                 return jsonify({"error": "'filtros' debe ser una lista"}), 400
         except Exception:
-            return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
+            return jsonify({"error": "Formato JSON invalido en 'filtros'"}), 400
     else:
         filtros = []  # si no hay filtros, busca todos los registros
 
@@ -76,11 +76,11 @@ def getCantidad(tabla):# metodo que devuelve la suma total de elementos segun la
             if not isinstance(filtros, list):
                 return jsonify({"error": "'filtros' debe ser una lista"}), 400
         except Exception:
-            return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
+            return jsonify({"error": "Formato JSON invalido en 'filtros'"}), 400
     else:
         filtros = []
     try:
-        cant = models.execute_kw(DB, session["uid"], session["password"], tabla, 'search_count', [filtros])
+        cant = models.execute_kw(DB, session["uid"], session["password"], tabla, 'search_count', [filtros])#devuelve int asi que paso a string
         return str(cant), 200
     except Exception as e:
         return {"error": str(e)}, 500
@@ -94,15 +94,15 @@ def getDatos(tabla):# devuelve los datos de un elemento segun la tabla y el id(s
     id_str = request.args.get("id")
     campos_str = request.args.get("campos")
     if not id_str:
-        return jsonify({"error": "El parámetro 'id' es obligatorio."}), 400
+        return jsonify({"error": "El parametro 'id' es obligatorio."}), 400
     try:
-        if id_str.startswith("["):
+        if id_str.startswith("["):#para cargar los id sean en array o solos
             ids = json.loads(id_str)
         else :
             ids = [int(id_str)]
 
     except Exception:
-        return jsonify({"error": "Formato inválido para 'id'. Debe ser un número o una lista JSON."}), 400
+        return jsonify({"error": "Formato invalido para 'id'. Debe ser un número o una lista JSON."}), 400
 
     if campos_str:
         try:
@@ -110,7 +110,7 @@ def getDatos(tabla):# devuelve los datos de un elemento segun la tabla y el id(s
             if not isinstance(campos, list):
                 return jsonify({"error": "'campos' debe ser una lista"}), 400
         except Exception:
-            return jsonify({"error": "Formato JSON inválido en 'campos'"}), 400
+            return jsonify({"error": "Formato JSON invalido en 'campos'"}), 400
     else:
         campos = []  # sin campos = todos los disponibles
     try:
@@ -134,7 +134,7 @@ def getFiltrosYCampos(tabla):# metodo que devuelve los datos segun tabla y con f
             if not isinstance(campos, list):
                 return jsonify({"error": "'campos' debe ser una lista"}), 400
         except Exception:
-            return jsonify({"error": "Formato JSON inválido en 'campos'"}), 400
+            return jsonify({"error": "Formato JSON invalido en 'campos'"}), 400
     else:
         campos = []
 
@@ -144,7 +144,7 @@ def getFiltrosYCampos(tabla):# metodo que devuelve los datos segun tabla y con f
             if not isinstance(filtros, list):
                 return jsonify({"error": "'filtros' debe ser una lista"}), 400
         except Exception:
-            return jsonify({"error": "Formato JSON inválido en 'filtros'"}), 400
+            return jsonify({"error": "Formato JSON invalido en 'filtros'"}), 400
     else:
         filtros = []
     try:
@@ -156,7 +156,7 @@ def getFiltrosYCampos(tabla):# metodo que devuelve los datos segun tabla y con f
 
 
 @app.route("/nuevo/<string:tabla>", methods=['POST'])
-def nuevo(tabla):# metodo para aniadir nuevos elementos con sus atributos
+def nuevo(tabla):# metodo para aniadir nuevos elementos con sus atributos a una tabla
     if "uid" not in session:
         return jsonify({"error": "Usuario no autenticado"}), 401
     data = request.get_json()
@@ -169,7 +169,7 @@ def nuevo(tabla):# metodo para aniadir nuevos elementos con sus atributos
         return {"error": str(e)}, 500
 
 @app.route("/modificar/<string:tabla>/<int:id>", methods=['PUT'])
-def modificar(tabla, id):#metodo para modificar los atributos de los elementos de una tabla con id(s)
+def modificar(tabla, id):#metodo para modificar los atributos de los elementos de una tabla por id
     if "uid" not in session:
         return jsonify({"error": "Usuario no autenticado"}), 401
     data = request.get_json()
@@ -201,5 +201,5 @@ def eliminar(tabla, id):#metodo para eliminar por id
 
 
 
-if __name__=="__main__":
+if __name__=="__main__":#iniciar el programa en el puerto 5000
     app.run(debug=True, port=5000)
