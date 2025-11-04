@@ -1,5 +1,6 @@
 import json, xmlrpc.client
 from flask import Flask, jsonify, request, render_template, session
+from flask_cors import CORS
 # valiables globales
 url = "http://odoogroup3.duckdns.org"
 DB = "edu-TechSolutions"
@@ -7,7 +8,13 @@ common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
 models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
 
 app = Flask(__name__)
-app.secret_key = "una_clave_super_segura"
+app.secret_key = "usuario"
+CORS(app, supports_credentials=True, origins=["http://localhost:8100"])
+app.config.update(
+    SESSION_COOKIE_SAMESITE='None',  # 'None' solo si HTTPS
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True
+)
 #metodo para mostrar documentacion de la api al inicio
 @app.route("/", methods=['GET'])
 def api_documentation():
@@ -18,7 +25,7 @@ def login():
     data = request.get_json()
     user = data.get("user")
     password = data.get("password")
-    
+
     uid = common.authenticate(DB, user, password, {})
     if uid:
         session["uid"] = uid
@@ -60,7 +67,7 @@ def getCantidad(tabla):# metodo que devuelve la suma total de elementos segun la
 
     if "uid" not in session:
         return jsonify({"error": "Usuario no autenticado"}), 401
-    
+
     filtros_str = request.args.get("filtros")
 
     if filtros_str:
@@ -90,13 +97,13 @@ def getDatos(tabla):# devuelve los datos de un elemento segun la tabla y el id(s
         return jsonify({"error": "El parámetro 'id' es obligatorio."}), 400
     try:
         if id_str.startswith("["):
-            ids = json.loads(id_str) 
+            ids = json.loads(id_str)
         else :
             ids = [int(id_str)]
 
     except Exception:
         return jsonify({"error": "Formato inválido para 'id'. Debe ser un número o una lista JSON."}), 400
-    
+
     if campos_str:
         try:
             campos = json.loads(campos_str)
@@ -148,73 +155,44 @@ def getFiltrosYCampos(tabla):# metodo que devuelve los datos segun tabla y con f
 
 
 
-@app.route("/nuevo", methods=['POST'])
-def nuevo():# metodo para aniadir nuevos elementos con sus atributos
+@app.route("/nuevo/<string:tabla>", methods=['POST'])
+def nuevo(tabla):# metodo para aniadir nuevos elementos con sus atributos
     if "uid" not in session:
         return jsonify({"error": "Usuario no autenticado"}), 401
     data = request.get_json()
-    tabla = data.get("tabla")
-    nuevo = data.get("nuevo")# un objeto json para atributos del nuevo elemento
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
-    if not isinstance(nuevo, dict):
-        return {"error": "El parametro 'nuevo' debe ser un diccionario."}, 400
+    if not isinstance(data, dict):
+        return {"error": "El parametro debe ser un diccionario."}, 400
     try:
-        nuevo_id = models.execute_kw(DB, session["uid"], session["password"], tabla, 'create', [nuevo])
+        nuevo_id = models.execute_kw(DB, session["uid"], session["password"], tabla, 'create', [data])
         return jsonify({"id": nuevo_id}), 200
     except Exception as e:
-        return {"error": str(e)}, 500 
+        return {"error": str(e)}, 500
 
-@app.route("/modificar", methods=['PUT'])
-def modificar():#metodo para modificar los atributos de los elementos de una tabla con id(s) 
+@app.route("/modificar/<string:tabla>/<int:id>", methods=['PUT'])
+def modificar(tabla, id):#metodo para modificar los atributos de los elementos de una tabla con id(s)
     if "uid" not in session:
         return jsonify({"error": "Usuario no autenticado"}), 401
     data = request.get_json()
-    tabla = data.get("tabla")
-    id = data.get("id")
-    modificaciones = data.get("modificaciones")
-
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
-    if not id:
-        return {"error": "El parametro 'id' es obligatorio."}, 400
-    if not modificaciones or not isinstance(modificaciones, dict):
-        return {"error": "El parametro 'modificaciones' debe ser un diccionario con los cambios."}, 400
+    if not data or not isinstance(data, dict):
+        return {"error": "El parametro debe ser un diccionario con los cambios."}, 400
 
     try:
-        if isinstance(id, list):
-            ids = id 
-        else:
-            ids = [id]
-        result = models.execute_kw(DB, session["uid"], session["password"], tabla, 'write', [ids, modificaciones])
+        result = models.execute_kw(DB, session["uid"], session["password"], tabla, 'write', [[id], data])
         if result:
             return {"message": "Operacion exitosa"}, 200
         else:
             return {"error": "No se pudo modificar el registro"}, 400
     except Exception as e:
         return {"error": str(e)}, 500
-    
 
-@app.route("/eliminar", methods=['DELETE'])
-def eliminar():#metodo para eliminar por id
+
+@app.route("/eliminar/<string:tabla>/<int:id>", methods=['DELETE'])
+def eliminar(tabla, id):#metodo para eliminar por id
     if "uid" not in session:
         return jsonify({"error": "Usuario no autenticado"}), 401
-    data = request.get_json()
-    tabla = data.get("tabla")
-    id = data.get("id")
-
-    if not tabla:
-        return {"error": "El parametro 'tabla' es obligatorio."}, 400
-    if not id:
-        return {"error": "El parametro 'id' es obligatorio."}, 400
-
     try:
-        if isinstance(id, list):
-            ids = id 
-        else:
-            ids = [id]
-        success = models.execute_kw(DB, session["uid"], session["password"], tabla, 'unlink', [ids])
-        if success:
+        result = models.execute_kw(DB, session["uid"], session["password"], tabla, 'unlink', [[id]])
+        if result:
             return {"message": "Registro eliminado exitosamente."}, 200
         else:
             return {"error": "No se pudo eliminar los registros."}, 400
