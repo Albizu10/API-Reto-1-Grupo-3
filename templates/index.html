@@ -78,11 +78,11 @@
     </div>
 
     <div class="endpoint">
-        <h2>/nuevo <span class="method">POST</span></h2>
+        <h2>/nuevo/&lt;tabla&gt; <span class="method">POST</span></h2>
         <p>Crea un nuevo registro en una tabla.</p>
         <pre>{
-  "tabla": "res.partner",
-  "nuevo": {"name": "Empresa X", "email": "contacto@empresa.com"}
+"name": "Empresa X",
+"email": "contacto@empresa.com"
 }</pre>
         <h3>Salida</h3>
         <p><b>Tipo:</b> Json</p>
@@ -93,13 +93,13 @@
     </div>
 
     <div class="endpoint">
-        <h2>/modificar <span class="method">PUT</span></h2>
+        <h2>/modificar/&lt;tabla&gt;/&lt;id&gt; <span class="method">PUT</span></h2>
         <p>Modifica los registros existentes según ID(s).</p>
         <pre>{
-  "tabla": "res.partner",
-  "id": [5],
-  "modificaciones": {"phone": "123456789"}
+"name": "Pepe",
+"phone": "123456789"
 }</pre>
+        <p><b>Ejemplo:</b> /modificar/res.partner/1</p>
         <h3>Salida</h3>
         <p><b>Tipo:</b> Json</p>
         <pre>{
@@ -110,12 +110,9 @@
     </div>
 
     <div class="endpoint">
-        <h2>/eliminar <span class="method">DELETE</span></h2>
+        <h2>/eliminar/&lt;tabla&gt;/&lt;id&gt; <span class="method">DELETE</span></h2>
         <p>Elimina uno o varios registros de una tabla.</p>
-        <pre>{
-  "tabla": "res.partner",
-  "id": [10,11]
-}</pre>
+        <p><b>Ejemplo:</b> /eliminar/res.partner/1</p>
         <h3>Salida</h3>
         <p><b>Tipo:</b> Json</p>
         <pre>{
